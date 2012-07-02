@@ -30,7 +30,13 @@ module Radiustar
       @packet.set_encoded_attribute('User-Password', password, secret)
 
       user_attributes.each_pair do |name, value|
-        @packet.set_attribute(name, value)
+      	if value.kind_of?(Array) then
+		value.each do |v|
+			@packet.set_attribute(name, v)
+		end
+	else
+        	@packet.set_attribute(name, value)
+	end
       end
 
       retries = @retries_number

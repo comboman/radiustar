@@ -106,7 +106,18 @@ module Radiustar
     end
 
     def set_attribute(name, value)
-      @attributes[name] = Attribute.new(@dict, name, value)
+			if @attributes[name] then
+				if @attributes[name].kind_of?(Array) then
+					@attributes[name].push(Attribute.new(@dict, name, value))
+				else
+					o_attr = @attributes[name]
+					@attributes[name] = Array.new
+					@attributes[name].push(Attribute.new(@dict, name, value))
+					@attributes[name].push(o_attr)
+				end
+			else 
+				@attributes[name] = Attribute.new(@dict, name, value)
+			end
     end
 
     def unset_attribute(name)
@@ -136,7 +147,13 @@ module Radiustar
     def pack
       attstr = ""
       @attributes.values.each do |attribute|
-        attstr += attribute.pack
+      	if attribute.kind_of?(Array) then
+					attribute.each do |a|
+						attstr += a.pack
+					end
+				else
+        	attstr += attribute.pack
+				end
       end
       @packed = [CODES[@code], @id, attstr.length + HDRLEN, @authenticator, attstr].pack(P_HDR)
     end
